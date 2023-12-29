@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"goprojects/chooseyouradventure/story"
-	"io"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -25,19 +24,13 @@ func main() {
 	}
 	defer jsonFile.Close()
 
-	jsonBytes, err := io.ReadAll(jsonFile)
+	adventureStory, err := story.JsonToStory(jsonFile)
 	if err != nil {
-		log.Fatal("Could not convert json file into byte array")
+		log.Fatal("Could not convert json data.")
 	}
+	fmt.Printf("%+v\n", adventureStory)
 
-	var adventureStory story.Story
-	json.Unmarshal(jsonBytes, &adventureStory)
-
-	for name, chapter := range adventureStory {
-		fmt.Println(name)
-		chapter.Display()
-		break
-	}
+	log.Fatal(http.ListenAndServe(":8080", story.StoryHandler(adventureStory)))
 }
 
 // d := json.NewDecoder(f)
